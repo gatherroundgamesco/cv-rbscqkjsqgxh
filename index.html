@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cabin + Addition</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="module" src="model-viewer.min.js"></script>
+<style>
+  html, body { margin: 0; height: 100%; background: #1d2126; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  model-viewer { width: 100vw; height: 100vh; height: 100dvh; --poster-color: #1d2126; }
+  .hud { position: fixed; left: 12px; top: calc(10px + env(safe-area-inset-top)); color: #fff; text-shadow: 0 1px 3px #000a; pointer-events: none; }
+  .hud h1 { font-size: 17px; margin: 0 0 2px; font-weight: 600; } .hud p { font-size: 12px; margin: 0; opacity: .85; }
+  .ar-btn { position: absolute; right: 14px; bottom: calc(16px + env(safe-area-inset-bottom)); padding: 10px 16px; border-radius: 22px; border: 0;
+            background: #fff; color: #111; font-weight: 600; font-size: 14px; box-shadow: 0 2px 8px #0006; }
+  .bar { position: absolute; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom)); transform: translateX(-50%); display: flex; gap: 8px; }
+  .bar button { padding: 8px 12px; border-radius: 18px; border: 0; background: #000a; color: #fff; font-size: 13px; }
+  #progress { position: absolute; left: 0; top: 0; height: 3px; background: #e9b44c; width: 0; transition: width .2s; }
+</style>
+</head>
+<body>
+<model-viewer id="mv" src="cabin_v2.glb" poster="poster.jpg" alt="Cabin + Addition"
+  camera-controls touch-action="pan-y" auto-rotate auto-rotate-delay="2500" rotation-per-second="12deg"
+  interaction-prompt="auto" ar ar-modes="webxr scene-viewer quick-look" ar-scale="auto" ar-placement="floor"
+  environment-image="kloofendal_48d_partly_cloudy_puresky_1k.hdr" skybox-image="kloofendal_48d_partly_cloudy_puresky_1k.hdr" skybox-height="1.7m" exposure="1.0" shadow-intensity="1" shadow-softness="0.8"
+  tone-mapping="aces" camera-orbit="45deg 78deg 30m" camera-target="3m 2.5m 2m" field-of-view="38deg"
+  min-camera-orbit="auto 5deg 8m" max-camera-orbit="auto 88deg 44m" interpolation-decay="120" loading="eager">
+  <div id="progress" slot="progress-bar"></div>
+  <button slot="ar-button" class="ar-btn">View in your space</button>
+  <div class="bar">
+    <button data-orbit="45deg 78deg 30m">Front</button>
+    <button data-orbit="-135deg 76deg 30m">Rear</button>
+    <button data-orbit="40deg 30deg 42m">Aerial</button>
+  </div>
+</model-viewer>
+<div class="hud"><h1>Cabin + Addition</h1><p>Drag to orbit · pinch to zoom · AR on iPhone/iPad</p></div>
+<script>
+  const mv = document.getElementById('mv');
+  mv.addEventListener('progress', e => { const p = document.getElementById('progress'); p.style.width = (e.detail.totalProgress * 100) + '%'; if (e.detail.totalProgress === 1) p.style.opacity = 0; });
+  document.querySelectorAll('.bar button').forEach(b => b.addEventListener('click', () => { mv.cameraOrbit = b.dataset.orbit; mv.autoRotate = false; }));
+</script>
+</body>
+</html>
