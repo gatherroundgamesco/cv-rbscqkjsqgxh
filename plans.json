@@ -1,0 +1,214 @@
+{
+ "plans": [
+  {
+   "id": "two_story_1216_summit",
+   "name": "Two-Story 1216 Summit",
+   "size": "2 floors · 38'-0\" x 16'-0\"",
+   "area": "1,216 sf",
+   "beds": "2 + office",
+   "baths": "2 (split master bath)",
+   "cost": "$368k likely (range $231k – $597k)",
+   "king": "51½ / 51½ / 43 in. clear (side / side / foot)",
+   "sky": "+$5.0k likely (upstairs hall)",
+   "tube": "+$2.8k likely (1 x 14\" tube)",
+   "model": "models/plan_two_story_1216_summit.glb",
+   "thumb": "thumbs/two_story_1216_summit.png",
+   "f1": 0.917,
+   "f2": 9.917,
+   "skylights": [
+    [
+     13.5,
+     9.6
+    ]
+   ],
+   "tubes": [
+    [
+     9.5,
+     9.6
+    ]
+   ],
+   "note": "Draft massing model"
+  },
+  {
+   "id": "two_story_1088_summit",
+   "name": "Two-Story 1088 Summit",
+   "size": "2 floors · 34'-0\" x 16'-0\"",
+   "area": "1,088 sf",
+   "beds": "2 + desk nook",
+   "baths": "2 (master bath with WC room + lav)",
+   "cost": "$352k likely (range $219k – $582k)",
+   "king": "51½ / 51½ / 43 in. clear (side / side / foot)",
+   "sky": "+$5.0k likely (upstairs hall)",
+   "tube": "+$2.8k likely (1 x 14\" tube)",
+   "model": "models/plan_two_story_1088_summit.glb",
+   "thumb": "thumbs/two_story_1088_summit.png",
+   "f1": 0.917,
+   "f2": 9.917,
+   "skylights": [
+    [
+     10.5,
+     10.4
+    ]
+   ],
+   "tubes": [
+    [
+     6.5,
+     10.4
+    ]
+   ],
+   "note": "Detailed model"
+  },
+  {
+   "id": "two_story_1088_classic",
+   "name": "Two-Story 1088 Classic",
+   "size": "2 floors · 34'-0\" x 16'-0\"",
+   "area": "1,088 sf",
+   "beds": "2",
+   "baths": "2 (master bath + bath 1)",
+   "cost": "$323k likely (range $203k – $528k)",
+   "king": "51½ / 51½ / 43 in. clear (side / side / foot)",
+   "sky": "+$5.0k likely (upstairs hall)",
+   "tube": "+$2.8k likely (1 x 14\" tube)",
+   "model": "models/plan_two_story_1088_classic.glb",
+   "thumb": "thumbs/two_story_1088_classic.png",
+   "f1": 0.917,
+   "f2": 9.917,
+   "skylights": [
+    [
+     10.5,
+     9.6
+    ]
+   ],
+   "tubes": [
+    [
+     6.5,
+     9.6
+    ]
+   ],
+   "note": "Draft massing model"
+  },
+  {
+   "id": "two_story_960_classic",
+   "name": "Two-Story 960 Classic",
+   "size": "2 floors · 30'-0\" x 16'-0\"",
+   "area": "960 sf",
+   "beds": "2",
+   "baths": "2 (existing bath + master bath)",
+   "cost": "$300k likely (range $188k – $491k)",
+   "king": "39½ N / 35 S / 43 in. clear (side / side / foot)",
+   "sky": "+$5.0k likely (upstairs hall)",
+   "tube": "+$2.8k likely (1 x 14\" tube)",
+   "model": "models/plan_two_story_960_classic.glb",
+   "thumb": "thumbs/two_story_960_classic.png",
+   "f1": 0.0,
+   "f2": 9.0,
+   "skylights": [
+    [
+     12.0,
+     9.6
+    ]
+   ],
+   "tubes": [
+    [
+     8.0,
+     9.6
+    ]
+   ],
+   "note": "Draft massing model"
+  },
+  {
+   "id": "one_story_608_classic",
+   "name": "One-Story 608 Classic",
+   "size": "1 floor · 38'-0\" x 16'-0\"",
+   "area": "608 sf (528 new-built + kept bath)",
+   "beds": "1 (master)",
+   "baths": "2 (existing bath kept + en-suite master bath)",
+   "cost": "$256k likely (range $160k – $424k)",
+   "king": "51½ / 51½ / 43 in. clear (side / side / foot)",
+   "sky": "+$5.0k likely (main hall)",
+   "tube": "+$4.8k likely (2 x 14\" tube)",
+   "model": "models/plan_one_story_608_classic.glb",
+   "thumb": "thumbs/one_story_608_classic.png",
+   "f1": 0.917,
+   "f2": null,
+   "skylights": [
+    [
+     4.6,
+     9.6
+    ]
+   ],
+   "tubes": [
+    [
+     4.6,
+     9.6
+    ],
+    [
+     11.0,
+     9.6
+    ]
+   ],
+   "note": "Draft massing model"
+  },
+  {
+   "id": "two_story_545_classic_basic",
+   "name": "Two-Story 545 Classic Basic",
+   "size": "2 floors · 18'-2\" x 15'-0\"",
+   "area": "545 sf (465 new-built + kept bath)",
+   "beds": "1",
+   "baths": "2 (existing bath kept + 1 new bath stacked over it)",
+   "cost": "$154k likely (range $95k – $258k)",
+   "king": "32 / 32 / 38½ in. clear (side / side / foot)",
+   "sky": "+$5.0k likely (upstairs top landing)",
+   "tube": "+$2.8k likely (1 x 14\" tube)",
+   "model": "models/plan_two_story_545_classic_basic.glb",
+   "thumb": "thumbs/two_story_545_classic_basic.png",
+   "f1": 0.0,
+   "f2": 9.0,
+   "skylights": [
+    [
+     1.9,
+     12.9
+    ]
+   ],
+   "tubes": [
+    [
+     1.9,
+     12.9
+    ]
+   ],
+   "note": "Draft massing model"
+  },
+  {
+   "id": "one_story_328_classic_basic",
+   "name": "One-Story 328 Classic Basic",
+   "size": "1 floor · 17'-10\" x 18'-4½\"",
+   "area": "328 sf (248 new-built + kept bath)",
+   "beds": "1",
+   "baths": "2 (existing bath kept + 1 new bath back-to-back)",
+   "cost": "$128k likely (range $79k – $214k)",
+   "king": "30 / 30 / 30 in. clear (side / side / foot)",
+   "sky": "+$4.7k likely (hall)",
+   "tube": "+$2.6k likely (1 x 14\" tube)",
+   "model": "models/plan_one_story_328_classic_basic.glb",
+   "thumb": "thumbs/one_story_328_classic_basic.png",
+   "f1": 0.0,
+   "f2": null,
+   "skylights": [
+    [
+     3.0,
+     5.2
+    ]
+   ],
+   "tubes": [
+    [
+     3.0,
+     5.2
+    ]
+   ],
+   "note": "Draft massing model"
+  }
+ ],
+ "siding": "Wood half-log siding matching existing bath (to confirm on site)",
+ "built": "Addition: stick-framed walls with log-look wood half-log siding outside, painted drywall inside. The main cabin stays real log.",
+ "basis": "Budget ranges, loaded (GC fee + contingency), 2026 dollars, not bids. Skylight and light tube are optional and NOT in the totals."
+}

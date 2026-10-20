@@ -4,67 +4,133 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Cabin + Addition (v4)</title>
-<meta name="apple-mobile-web-app-capable" content="yes">
-<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
+<title>Cabin addition · 7 plans · 3D viewer</title>
 <style>
-  html, body { margin: 0; height: 100%; background: #1d2126; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-  model-viewer { width: 100vw; height: 100vh; height: 100dvh; --poster-color: #1d2126; }
-  .hud { position: fixed; left: 12px; top: calc(10px + env(safe-area-inset-top)); color: #fff; text-shadow: 0 1px 3px #000a; pointer-events: none; }
-  .hud h1 { font-size: 17px; margin: 0 0 2px; font-weight: 600; } .hud p { font-size: 12px; margin: 0; opacity: .85; }
-  .floors { position: fixed; right: 10px; top: calc(10px + env(safe-area-inset-top)); display: flex; flex-direction: column; gap: 6px; z-index: 5; }
-  .floors button, .bar button { -webkit-appearance: none; appearance: none; padding: 9px 13px; border-radius: 18px; border: 1px solid #fff3;
-            background: #000b; color: #fff; font-size: 13px; font-weight: 600; touch-action: manipulation; cursor: pointer; }
-  .floors button.on { background: #e9b44c; color: #111; border-color: #e9b44c; }
-  .floors button:disabled { opacity: .55; }
-  .bar { position: absolute; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom)); transform: translateX(-50%); display: flex; gap: 8px; }
-  #progress { position: absolute; left: 0; top: 0; height: 3px; background: #e9b44c; width: 0; transition: width .2s; }
-  .ar-btn { position: absolute; right: 14px; bottom: calc(64px + env(safe-area-inset-bottom)); padding: 10px 16px; border-radius: 22px; border: 0;
-            background: #fff; color: #111; font-weight: 600; font-size: 14px; box-shadow: 0 2px 8px #0006; }
+  html, body { margin: 0; height: 100%; background: #1d2126; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #fff; overflow: hidden; }
+  #c { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; }
+  .side { position: fixed; left: 10px; top: 10px; bottom: 10px; width: 250px; display: flex; flex-direction: column; gap: 6px; z-index: 5; overflow-y: auto; }
+  .side h1 { font-size: 15px; margin: 2px 4px 4px; font-weight: 650; text-shadow: 0 1px 3px #000a; }
+  .plan { display: flex; align-items: center; gap: 8px; padding: 5px 7px; border-radius: 10px; border: 1px solid #fff3; background: #000b; color: #fff; cursor: pointer; text-align: left; font: inherit; }
+  .plan img { width: 74px; height: 44px; object-fit: contain; background: #fff; border-radius: 5px; flex: none; }
+  .plan span { font-size: 12.5px; font-weight: 600; line-height: 1.2; }
+  .plan small { display: block; font-weight: 400; opacity: .8; font-size: 11px; }
+  .plan.on { background: #e9b44c; color: #111; border-color: #e9b44c; }
+  .plan:disabled { opacity: .6; cursor: wait; }
+  .info { position: fixed; right: 10px; top: 10px; width: 300px; background: #000c; border: 1px solid #fff2; border-radius: 12px; padding: 10px 12px; font-size: 12px; z-index: 5; }
+  .info h2 { font-size: 15px; margin: 0 0 6px; }
+  .info table { border-collapse: collapse; width: 100%; } .info td { padding: 2px 0; vertical-align: top; } .info td:first-child { opacity: .7; width: 92px; }
+  .info p { margin: 6px 0 0; opacity: .8; font-size: 11px; line-height: 1.35; }
+  .bar { position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; z-index: 5; max-width: calc(100vw - 600px); }
+  .bar button { padding: 8px 12px; border-radius: 16px; border: 1px solid #fff3; background: #000b; color: #fff; font-size: 12.5px; font-weight: 600; cursor: pointer; }
+  .bar button.on { background: #6fb3e0; color: #111; border-color: #6fb3e0; }
+  .bar button:disabled { opacity: .4; cursor: default; }
+  #status { position: fixed; left: 50%; top: 14px; transform: translateX(-50%); background: #000b; padding: 6px 12px; border-radius: 12px; font-size: 12px; z-index: 6; }
 </style>
 </head>
 <body>
-<model-viewer id="mv" src="cabin_v4_full.glb" poster="poster.jpg" alt="Log cabin with two-storey addition"
-  camera-controls touch-action="pan-y" auto-rotate auto-rotate-delay="2500" rotation-per-second="12deg"
-  interaction-prompt="auto" ar ar-modes="webxr scene-viewer quick-look" ar-scale="auto" ar-placement="floor"
-  environment-image="kloofendal_48d_partly_cloudy_puresky_1k.hdr" skybox-image="kloofendal_48d_partly_cloudy_puresky_1k.hdr" skybox-height="1.7m"
-  exposure="1.0" shadow-intensity="1" shadow-softness="0.8" tone-mapping="aces"
-  camera-orbit="45deg 78deg 30m" camera-target="3m 2.5m 1.6m" field-of-view="38deg"
-  min-camera-orbit="auto 5deg 6m" max-camera-orbit="auto 88deg 44m" interpolation-decay="120" loading="eager">
-  <div id="progress" slot="progress-bar"></div>
-  <button slot="ar-button" class="ar-btn">View in your space</button>
-  <div class="bar">
-    <button data-orbit="45deg 78deg 30m">Front</button>
-    <button data-orbit="-135deg 76deg 30m">Rear</button>
-    <button data-orbit="30deg 25deg 34m">Top</button>
-  </div>
-</model-viewer>
-<div class="floors" role="group" aria-label="Floor view">
-  <button class="on" data-src="cabin_v4_full.glb" data-target="3m 2.5m 1.6m">Full house</button>
-  <button data-src="cabin_v4_floor2_open.glb" data-target="3.5m 3.2m -1.2m" data-orbit="35deg 40deg 27m">Floor 2 open</button>
-  <button data-src="cabin_v4_floor1_open.glb" data-target="3m 0.8m 1.6m" data-orbit="35deg 38deg 30m">Floor 1 open</button>
+<canvas id="c"></canvas>
+<div class="side" id="side"><h1>Cabin addition · 7 plans</h1></div>
+<div class="info" id="info"></div>
+<div class="bar">
+  <button data-view="front">Front</button><button data-view="rear">Rear</button><button data-view="top">Top</button>
+  <button data-cut="full" class="on">Whole house</button><button data-cut="f2" id="cutf2">Upper floor cut-away</button><button data-cut="f1">Main floor cut-away</button>
+  <button id="sky">Skylight (option)</button><button id="tube">Light tube (option)</button>
 </div>
-<div class="hud"><h1>Cabin + Addition</h1><p>Drag to orbit · pinch to zoom · floors: top right</p></div>
-<script>
-  // Floor toggle = swap between three pre-cut GLBs (roof / upper floor removed in the model file itself).
-  // One model is in memory at a time (safe on iPhone Safari); the others are prefetched into the HTTP cache after first load.
-  const mv = document.getElementById('mv'), btns = [...document.querySelectorAll('.floors button')];
-  const bar = document.getElementById('progress');
-  mv.addEventListener('progress', e => { bar.style.opacity = 1; bar.style.width = (e.detail.totalProgress * 100) + '%'; if (e.detail.totalProgress === 1) bar.style.opacity = 0; });
-  let pending = null, prefetched = false;
-  mv.addEventListener('load', () => {
-    btns.forEach(b => b.disabled = false);
-    if (pending) { mv.cameraTarget = pending.target; if (pending.orbit) mv.cameraOrbit = pending.orbit; mv.jumpCameraToGoal(); pending = null; }
-    if (!prefetched) { prefetched = true; setTimeout(() => btns.slice(1).forEach(b => fetch(b.dataset.src).catch(() => {})), 1500); }
-  });
-  btns.forEach(b => b.addEventListener('click', () => {
-    if (b.classList.contains('on')) return;
-    btns.forEach(x => { x.classList.toggle('on', x === b); x.disabled = true; });
-    mv.autoRotate = false;
-    pending = { target: b.dataset.target, orbit: b.dataset.orbit || mv.getCameraOrbit().toString() };
-    mv.src = b.dataset.src;
-  }));
-  document.querySelectorAll('.bar button').forEach(b => b.addEventListener('click', () => { mv.cameraOrbit = b.dataset.orbit; mv.autoRotate = false; }));
+<div id="status">loading…</div>
+<script type="importmap">{ "imports": { "three": "./vendor/three/build/three.module.min.js", "three/addons/": "./vendor/three/examples/jsm/" } }</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
+const FT = 0.3048, P = (x, y, z) => new THREE.Vector3(x * FT, z * FT, -y * FT);   // plan feet (+x E, +y N, z up) -> glTF (Y up)
+const canvas = document.getElementById('c'), status = document.getElementById('status');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.localClippingEnabled = true;
+const scene = new THREE.Scene(); scene.background = new THREE.Color(0x9fb8cc);
+const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 600);
+const controls = new OrbitControls(camera, canvas); controls.enableDamping = true; controls.maxPolarAngle = Math.PI * 0.49; controls.minDistance = 3; controls.maxDistance = 70;
+scene.add(new THREE.HemisphereLight(0xffffff, 0x556b2f, 0.6)); const sun = new THREE.DirectionalLight(0xfff1dc, 2.2); sun.position.set(30, 40, 20); scene.add(sun);
+new RGBELoader().load('kloofendal_48d_partly_cloudy_puresky_1k.hdr', t => { t.mapping = THREE.EquirectangularReflectionMapping; scene.environment = t; scene.background = t; });
+const draco = new DRACOLoader().setDecoderPath('./vendor/three/examples/jsm/libs/draco/gltf/');
+const loader = new GLTFLoader().setDRACOLoader(draco);
+const cut = new THREE.Plane(new THREE.Vector3(0, -1, 0), 1e4);
+const NOCLIP = /Bark|Needles|Leaves|BirchBark|Ground|GrassTuft|Water/;
+let data, cur = null, model = null, extras = new THREE.Group(), skyOn = false, tubeOn = false, cutMode = 'full';
+scene.add(extras);
+function resize() { renderer.setSize(innerWidth, innerHeight, false); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); }
+addEventListener('resize', resize); resize();
+function view(v) {
+  const t = P(10, 4, 6); controls.target.copy(t);
+  const o = { front: P(70, -66, 38), rear: P(-48, 58, 34), top: P(16, -22, 95) }[v]; camera.position.copy(o); controls.update();
+}
+function applyCut() {
+  const p = cur; let h = 1e4;
+  if (cutMode === 'f2' && p.f2 != null) h = (p.f2 + 4.5) * FT; else if (cutMode === 'f1') h = (p.f1 + 4.5) * FT;
+  cut.constant = h;
+  document.querySelectorAll('[data-cut]').forEach(b => b.classList.toggle('on', b.dataset.cut === cutMode));
+  document.getElementById('cutf2').disabled = p.f2 == null;
+}
+// optional skylight / light tube: placed by casting a ray down onto the addition roof at the hall / landing spot
+function roofHit(x, y) {
+  const rc = new THREE.Raycaster(P(x, y, 60), new THREE.Vector3(0, -1, 0)); const hits = rc.intersectObject(model, true);
+  return hits.find(h => /Roof_metal|ADD_Roof|roof/i.test(h.object.name) || /RoofMetal/.test(h.object.material?.name || '')) || hits[0];
+}
+const glass = new THREE.MeshStandardMaterial({ color: 0x5c7f9c, metalness: 0.2, roughness: 0.08, transparent: true, opacity: 0.8 });
+const alu = new THREE.MeshStandardMaterial({ color: 0x3a3d40, metalness: 0.6, roughness: 0.4 });
+const dome = new THREE.MeshStandardMaterial({ color: 0xdfe8ee, metalness: 0.1, roughness: 0.05, transparent: true, opacity: 0.85 });
+function placeOnRoof(obj, x, y) {
+  const h = roofHit(x, y); if (!h) return;
+  const n = h.face.normal.clone().transformDirection(h.object.matrixWorld);
+  obj.position.copy(h.point); obj.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), n); extras.add(obj);
+}
+function rebuildExtras() {
+  extras.clear(); if (!model) return;
+  if (skyOn) for (const [x, y] of cur.skylights) {
+    const g = new THREE.Group(); const f = new THREE.Mesh(new THREE.BoxGeometry(2.4 * FT, 0.45 * FT, 4.2 * FT), alu); f.position.y = 0.22 * FT;
+    const gl = new THREE.Mesh(new THREE.BoxGeometry(2.0 * FT, 0.1 * FT, 3.8 * FT), glass); gl.position.y = 0.48 * FT; g.add(f, gl); g.name = 'option_skylight'; placeOnRoof(g, x, y);
+  }
+  if (tubeOn) for (const [x, y] of cur.tubes) {
+    const g = new THREE.Group(); const fl = new THREE.Mesh(new THREE.CylinderGeometry(0.9 * FT, 0.95 * FT, 0.25 * FT, 24), alu); fl.position.y = 0.12 * FT;
+    const d = new THREE.Mesh(new THREE.SphereGeometry(0.62 * FT, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), dome); d.position.y = 0.25 * FT; g.add(fl, d); g.name = 'option_light_tube'; placeOnRoof(g, x, y);
+  }
+  extras.traverse(o => { if (o.material) o.material.clippingPlanes = [cut]; });
+  document.getElementById('sky').classList.toggle('on', skyOn); document.getElementById('tube').classList.toggle('on', tubeOn);
+}
+function info(p) {
+  document.getElementById('info').innerHTML = `<h2>${p.name}</h2><table>
+  <tr><td>Size</td><td>${p.size}</td></tr><tr><td>Area</td><td>${p.area}</td></tr><tr><td>Bedrooms</td><td>${p.beds}</td></tr><tr><td>Baths</td><td>${p.baths}</td></tr>
+  <tr><td>Cost</td><td>${p.cost}</td></tr><tr><td>Master bed</td><td>California king · ${p.king}</td></tr>
+  <tr><td>Skylight</td><td>optional, ${p.sky}</td></tr><tr><td>Light tube</td><td>optional, ${p.tube}</td></tr><tr><td>3D</td><td>${p.note}</td></tr></table>
+  <p>${data.built} Siding in every total: ${data.siding}.</p><p>${data.basis}</p>`;
+}
+function load(i) {
+  const p = data.plans[i]; cur = p; info(p); status.style.display = 'block'; status.textContent = 'loading ' + p.name + '…';
+  document.querySelectorAll('.plan').forEach((b, j) => { b.classList.toggle('on', j === i); b.disabled = true; });
+  if (cutMode === 'f2' && p.f2 == null) cutMode = 'full';
+  loader.load(p.model, g => {
+    if (model) { scene.remove(model); model.traverse(o => { o.geometry?.dispose?.(); }); }
+    model = g.scene; scene.add(model);
+    model.traverse(o => { if (o.isMesh) { const ms = Array.isArray(o.material) ? o.material : [o.material]; ms.forEach(m => { if (!NOCLIP.test(m.name || '')) m.clippingPlanes = [cut]; m.clipShadows = true; }); } });
+    model.updateMatrixWorld(true); applyCut(); rebuildExtras(); status.style.display = 'none';
+    document.querySelectorAll('.plan').forEach(b => b.disabled = false); window.__ready = p.id;
+  }, e => { if (e.total) status.textContent = `loading ${p.name}… ${Math.round(100 * e.loaded / e.total)}%`; },
+     err => { status.textContent = 'could not load ' + p.model; console.error(err); document.querySelectorAll('.plan').forEach(b => b.disabled = false); });
+}
+fetch('plans.json').then(r => r.json()).then(d => {
+  data = d; const side = document.getElementById('side');
+  d.plans.forEach((p, i) => { const b = document.createElement('button'); b.className = 'plan';
+    b.innerHTML = `<img src="${p.thumb}" alt=""><span>${i + 1}. ${p.name}<small>${p.size.replace(' · ', ', ')}</small></span>`; b.onclick = () => load(i); side.appendChild(b); });
+  const q = new URLSearchParams(location.search); const start = Math.max(0, d.plans.findIndex(p => p.id === q.get('plan')));
+  if (q.get('sky')) skyOn = true; if (q.get('tube')) tubeOn = true; if (q.get('cut')) cutMode = q.get('cut');
+  view(q.get('view') || 'front'); load(start);
+});
+document.querySelectorAll('[data-view]').forEach(b => b.onclick = () => view(b.dataset.view));
+document.querySelectorAll('[data-cut]').forEach(b => b.onclick = () => { cutMode = b.dataset.cut; applyCut(); });
+document.getElementById('sky').onclick = () => { skyOn = !skyOn; rebuildExtras(); };
+document.getElementById('tube').onclick = () => { tubeOn = !tubeOn; rebuildExtras(); };
+renderer.setAnimationLoop(() => { controls.update(); renderer.render(scene, camera); });
 </script>
 </body>
 </html>
