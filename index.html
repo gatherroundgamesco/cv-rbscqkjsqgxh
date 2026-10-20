@@ -6,36 +6,88 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Cabin addition · 7 plans · 3D viewer</title>
 <style>
-  html, body { margin: 0; height: 100%; background: #1d2126; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #fff; overflow: hidden; }
-  #c { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; }
-  .side { position: fixed; left: 10px; top: 10px; bottom: 10px; width: 250px; display: flex; flex-direction: column; gap: 6px; z-index: 5; overflow-y: auto; }
-  .side h1 { font-size: 15px; margin: 2px 4px 4px; font-weight: 650; text-shadow: 0 1px 3px #000a; }
-  .plan { display: flex; align-items: center; gap: 8px; padding: 5px 7px; border-radius: 10px; border: 1px solid #fff3; background: #000b; color: #fff; cursor: pointer; text-align: left; font: inherit; }
-  .plan img { width: 74px; height: 44px; object-fit: contain; background: #fff; border-radius: 5px; flex: none; }
-  .plan span { font-size: 12.5px; font-weight: 600; line-height: 1.2; }
-  .plan small { display: block; font-weight: 400; opacity: .8; font-size: 11px; }
-  .plan.on { background: #e9b44c; color: #111; border-color: #e9b44c; }
-  .plan:disabled { opacity: .6; cursor: wait; }
-  .info { position: fixed; right: 10px; top: 10px; width: 300px; background: #000c; border: 1px solid #fff2; border-radius: 12px; padding: 10px 12px; font-size: 12px; z-index: 5; }
-  .info h2 { font-size: 15px; margin: 0 0 6px; }
-  .info table { border-collapse: collapse; width: 100%; } .info td { padding: 2px 0; vertical-align: top; } .info td:first-child { opacity: .7; width: 92px; }
-  .info p { margin: 6px 0 0; opacity: .8; font-size: 11px; line-height: 1.35; }
-  .bar { position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; z-index: 5; max-width: calc(100vw - 600px); }
-  .bar button { padding: 8px 12px; border-radius: 16px; border: 1px solid #fff3; background: #000b; color: #fff; font-size: 12.5px; font-weight: 600; cursor: pointer; }
-  .bar button.on { background: #6fb3e0; color: #111; border-color: #6fb3e0; }
-  .bar button:disabled { opacity: .4; cursor: default; }
-  #status { position: fixed; left: 50%; top: 14px; transform: translateX(-50%); background: #000b; padding: 6px 12px; border-radius: 12px; font-size: 12px; z-index: 6; }
+  :root { --pad: 10px; --bar: 44px; --ui: #0b0e12d9; --line: #ffffff2e; --accent: #e9b44c; --blue: #6fb3e0;
+          --st: env(safe-area-inset-top, 0px); --sb: env(safe-area-inset-bottom, 0px); --sl: env(safe-area-inset-left, 0px); --sr: env(safe-area-inset-right, 0px); }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: #1d2126; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #fff; overflow: hidden; -webkit-tap-highlight-color: transparent; }
+  #c { position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100dvh; display: block; touch-action: none; }
+  button { font: inherit; color: inherit; }
+  .btn { height: 36px; min-width: 36px; padding: 0 10px; border-radius: 18px; border: 1px solid var(--line); background: var(--ui); color: #fff; display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; font-size: 13px; font-weight: 600; white-space: nowrap; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+  .btn:hover { border-color: #fff6; } .btn:focus-visible { outline: 2px solid var(--blue); outline-offset: 1px; }
+  .btn svg { width: 18px; height: 18px; flex: none; }
+  .ico { padding: 0; width: 36px; }
+  /* top strip: plan picker + details */
+  .top { position: fixed; z-index: 10; top: calc(var(--pad) + var(--st)); left: calc(var(--pad) + var(--sl)); right: calc(var(--pad) + var(--sr)); height: var(--bar); display: flex; align-items: center; gap: 6px; pointer-events: none; }
+  .top > * { pointer-events: auto; }
+  #pick { flex: 0 1 auto; min-width: 0; max-width: 340px; justify-content: flex-start; }
+  #pick .nm { overflow: hidden; text-overflow: ellipsis; }
+  #pick .n { color: var(--accent); }
+  .grow { flex: 1 1 auto; pointer-events: none; }
+  /* plan menu (thumbnails only on demand) */
+  .menu { position: fixed; z-index: 20; background: #0b0e12f2; border: 1px solid var(--line); border-radius: 12px; padding: 6px; display: none; overflow-y: auto; box-shadow: 0 8px 30px #0008; }
+  .menu.open { display: block; }
+  #plans { top: calc(var(--pad) + var(--st) + var(--bar) + 4px); left: calc(var(--pad) + var(--sl)); width: min(340px, calc(100vw - 2 * var(--pad))); max-height: calc(100dvh - 120px); }
+  .menu h3 { margin: 4px 6px 6px; font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; opacity: .65; }
+  .pl { display: flex; width: 100%; align-items: center; gap: 9px; padding: 6px; border: 0; border-radius: 9px; background: transparent; color: #fff; cursor: pointer; text-align: left; }
+  .pl:hover, .pl:focus-visible { background: #ffffff14; outline: none; }
+  .pl.on { background: var(--accent); color: #111; }
+  .pl img { width: 64px; height: 38px; object-fit: contain; background: #fff; border-radius: 5px; flex: none; }
+  .pl span { font-size: 13px; font-weight: 600; line-height: 1.2; } .pl small { display: block; font-weight: 400; opacity: .8; font-size: 11.5px; }
+  /* view / floors / options menu, bottom-right corner */
+  .corner { position: fixed; z-index: 10; right: calc(var(--pad) + var(--sr)); bottom: calc(var(--pad) + var(--sb)); display: flex; gap: 6px; }
+  #tools { right: calc(var(--pad) + var(--sr)); bottom: calc(var(--pad) + var(--sb) + 44px); width: 236px; }
+  .grp { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-bottom: 8px; } .grp.two { grid-template-columns: 1fr 1fr; }
+  .grp button { min-height: 34px; padding: 4px 6px; border-radius: 8px; border: 1px solid var(--line); background: #ffffff0d; color: #fff; font-size: 12px; font-weight: 600; cursor: pointer; line-height: 1.15; }
+  .grp button.on { background: var(--blue); color: #111; border-color: var(--blue); } .grp button:disabled { opacity: .35; cursor: default; }
+  #tbtn .badge { background: var(--blue); color: #111; border-radius: 9px; padding: 1px 6px; font-size: 11px; display: none; } #tbtn .badge.show { display: inline; }
+  /* details: drawer (desktop) / bottom sheet (phone) */
+  #details { position: fixed; z-index: 30; background: #0b0e12f2; border: 1px solid var(--line); color: #fff; display: flex; flex-direction: column; box-shadow: 0 10px 40px #000a;
+             transition: transform .22s ease, opacity .22s; opacity: 0; pointer-events: none; }
+  #details.open { opacity: 1; pointer-events: auto; transform: none !important; }
+  #details header { display: flex; align-items: center; gap: 8px; padding: 12px 10px 8px 16px; }
+  #details header h2 { flex: 1; font-size: 16px; margin: 0; }
+  #details .body { overflow-y: auto; padding: 0 16px 16px; font-size: 13px; -webkit-overflow-scrolling: touch; }
+  #details table { border-collapse: collapse; width: 100%; } #details td { padding: 4px 0; vertical-align: top; border-bottom: 1px solid #ffffff12; } #details td:first-child { opacity: .7; width: 96px; }
+  #details tr.cost td { font-weight: 700; color: var(--accent); } #details tr.cost td:first-child { color: #fff; }
+  #details p { margin: 10px 0 0; opacity: .8; font-size: 12px; line-height: 1.4; }
+  .grab { display: none; }
+  @media (min-width: 700px) {
+    #details { top: 0; right: 0; bottom: 0; width: 360px; border-radius: 14px 0 0 14px; transform: translateX(105%); padding-top: var(--st); }
+  }
+  @media (max-width: 699.98px) {
+    #details { left: 0; right: 0; bottom: 0; max-height: 64dvh; border-radius: 16px 16px 0 0; transform: translateY(105%); padding-bottom: var(--sb); }
+    .grab { display: block; width: 40px; height: 5px; border-radius: 3px; background: #fff5; margin: 8px auto 0; }
+    #details header { padding-top: 6px; }
+    #pick { max-width: none; } .dlabel { display: none; } #dbtn { width: 36px; padding: 0; }
+    .tlabel { display: none; }
+  }
+  #status { position: fixed; z-index: 9; left: calc(var(--pad) + var(--sl)); bottom: calc(var(--pad) + var(--sb) + 4px); background: var(--ui); padding: 6px 11px; border-radius: 12px; font-size: 12px; pointer-events: none; max-width: 60vw; }
 </style>
 </head>
 <body>
-<canvas id="c"></canvas>
-<div class="side" id="side"><h1>Cabin addition · 7 plans</h1></div>
-<div class="info" id="info"></div>
-<div class="bar">
-  <button data-view="front">Front</button><button data-view="rear">Rear</button><button data-view="top">Top</button>
-  <button data-cut="full" class="on">Whole house</button><button data-cut="f2" id="cutf2">Upper floor cut-away</button><button data-cut="f1">Main floor cut-away</button>
-  <button id="sky">Skylight (option)</button><button id="tube">Light tube (option)</button>
+<canvas id="c" aria-label="3D model of the selected plan"></canvas>
+<div class="top">
+  <button class="btn ico" id="prev" aria-label="Previous plan" title="Previous plan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+  <button class="btn" id="pick" aria-haspopup="true" aria-expanded="false" aria-controls="plans" title="Choose a plan"><span class="nm" id="pickname">Plans</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></button>
+  <button class="btn ico" id="next" aria-label="Next plan" title="Next plan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg></button>
+  <span class="grow"></span>
+  <button class="btn" id="dbtn" aria-haspopup="dialog" aria-expanded="false" aria-controls="details" title="Plan details and budget"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="9.5"/><path d="M12 11v6" stroke-linecap="round"/><circle cx="12" cy="7.5" r="1.3" fill="currentColor" stroke="none"/></svg><span class="dlabel">Details</span></button>
 </div>
+<div class="menu" id="plans" role="menu" aria-label="Plans"><h3>Cabin addition · 7 plans</h3></div>
+<div class="corner">
+  <button class="btn ico" id="fit" aria-label="Fit model to screen" title="Fit model to screen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+  <button class="btn" id="tbtn" aria-haspopup="true" aria-expanded="false" aria-controls="tools" title="View, floors and options"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linejoin="round"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/></svg><span class="tlabel">View</span><span class="badge" id="badge"></span></button>
+</div>
+<div class="menu" id="tools" role="menu" aria-label="View, floors and options">
+  <h3>Camera</h3><div class="grp"><button data-view="front">Front</button><button data-view="rear">Rear</button><button data-view="top">Top</button></div>
+  <h3>Floors</h3><div class="grp"><button data-cut="full" class="on">Whole house</button><button data-cut="f2" id="cutf2">Upper floor cut-away</button><button data-cut="f1">Main floor cut-away</button></div>
+  <h3>Options</h3><div class="grp two" style="margin-bottom:2px"><button id="sky">Skylight (option)</button><button id="tube">Light tube (option)</button></div>
+</div>
+<aside id="details" role="dialog" aria-modal="false" aria-labelledby="dtitle" inert>
+  <div class="grab" id="grab"></div>
+  <header><h2 id="dtitle">Details</h2><button class="btn ico" id="dclose" aria-label="Close details" title="Close (Esc)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
+  <div class="body" id="info"></div>
+</aside>
 <div id="status">loading…</div>
 <script type="importmap">{ "imports": { "three": "./vendor/three/build/three.module.min.js", "three/addons/": "./vendor/three/examples/jsm/" } }</script>
 <script type="module">
@@ -44,6 +96,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
+const $ = id => document.getElementById(id);
 const FT = 0.3048, P = (x, y, z) => new THREE.Vector3(x * FT, z * FT, -y * FT);   // plan feet (+x E, +y N, z up) -> glTF (Y up)
 const canvas = document.getElementById('c'), status = document.getElementById('status');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
@@ -57,20 +110,14 @@ const draco = new DRACOLoader().setDecoderPath('./vendor/three/examples/jsm/libs
 const loader = new GLTFLoader().setDRACOLoader(draco);
 const cut = new THREE.Plane(new THREE.Vector3(0, -1, 0), 1e4);
 const NOCLIP = /Bark|Needles|Leaves|BirchBark|Ground|GrassTuft|Water/;
-let data, cur = null, model = null, extras = new THREE.Group(), skyOn = false, tubeOn = false, cutMode = 'full';
+let data, cur = null, model = null, extras = new THREE.Group(), skyOn = false, tubeOn = false, cutMode = 'full', curIdx = 0, viewDir = 'front';
 scene.add(extras);
-function resize() { renderer.setSize(innerWidth, innerHeight, false); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); }
-addEventListener('resize', resize); resize();
-function view(v) {
-  const t = P(10, 4, 6); controls.target.copy(t);
-  const o = { front: P(70, -66, 38), rear: P(-48, 58, 34), top: P(16, -22, 95) }[v]; camera.position.copy(o); controls.update();
-}
 function applyCut() {
   const p = cur; let h = 1e4;
   if (cutMode === 'f2' && p.f2 != null) h = (p.f2 + 4.5) * FT; else if (cutMode === 'f1') h = (p.f1 + 4.5) * FT;
   cut.constant = h;
-  document.querySelectorAll('[data-cut]').forEach(b => b.classList.toggle('on', b.dataset.cut === cutMode));
-  document.getElementById('cutf2').disabled = p.f2 == null;
+  document.querySelectorAll('[data-cut]').forEach(b => { b.classList.toggle('on', b.dataset.cut === cutMode); b.setAttribute('aria-pressed', b.dataset.cut === cutMode); });
+  document.getElementById('cutf2').disabled = p.f2 == null; updateBadge();
 }
 // optional skylight / light tube: placed by casting a ray down onto the addition roof at the hall / landing spot
 function roofHit(x, y) {
@@ -96,40 +143,139 @@ function rebuildExtras() {
     const d = new THREE.Mesh(new THREE.SphereGeometry(0.62 * FT, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), dome); d.position.y = 0.25 * FT; g.add(fl, d); g.name = 'option_light_tube'; placeOnRoof(g, x, y);
   }
   extras.traverse(o => { if (o.material) o.material.clippingPlanes = [cut]; });
-  document.getElementById('sky').classList.toggle('on', skyOn); document.getElementById('tube').classList.toggle('on', tubeOn);
+  for (const [id, on] of [['sky', skyOn], ['tube', tubeOn]]) { const b = document.getElementById(id); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); }
+  updateBadge();
+}
+
+// ---------- auto-frame: fit the house (not the site / trees) into the area no control covers ----------
+const SITE = /^(P_|SITEBOX|Ground|River|GrassTufts)/;
+const DIRS = { front: P(70, -66, 38).sub(P(10, 4, 6)), rear: P(-48, 58, 34).sub(P(10, 4, 6)), top: P(16, -22, 95).sub(P(10, 4, 6)) };
+let houseBox = null, W = 1, H = 1;
+function computeHouseBox() {
+  const box = new THREE.Box3(), tmp = new THREE.Box3();
+  model.traverse(o => {
+    if (!o.isMesh) return;
+    for (let a = o; a && a !== model; a = a.parent) if (SITE.test(a.name || '')) return;
+    tmp.setFromObject(o); const sz = tmp.getSize(new THREE.Vector3());
+    if (Math.max(sz.x, sz.y, sz.z) < 40) box.union(tmp);
+  });
+  if (box.isEmpty()) box.setFromObject(model);
+  return box;
+}
+function rectOf(el) { const r = el.getBoundingClientRect(); return { l: r.left, t: r.top, r: r.right, b: r.bottom }; }
+function visible(el) { if (!el) return false; const cs = getComputedStyle(el); if (cs.display === 'none' || cs.visibility !== 'visible' || +cs.opacity < 0.05) return false; const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0 && r.right > 0 && r.left < W && r.bottom > 0 && r.top < H; }
+function overlays() { return [...document.querySelectorAll('.top .btn, .corner, #plans, #tools, #details, #status')].filter(visible); }
+// clear area: viewport minus the top strip, the bottom corner row and an open drawer / sheet
+function clearRect() {
+  let l = 0, t = rectOf(document.querySelector('.top')).b + 6, r = W, b = Math.min(rectOf(document.querySelector('.corner')).t, H) - 6;
+  const d = $('details');
+  // use the drawer / sheet's resting size (not its mid-transition position)
+  if (d.classList.contains('open')) { if (matchMedia('(min-width: 700px)').matches) r = Math.min(r, W - d.offsetWidth - 6); else b = Math.min(b, H - d.offsetHeight - 6); }
+  return { l, t, r, b };
+}
+function corners(box) { const a = box.min, z = box.max, out = []; for (const x of [a.x, z.x]) for (const y of [a.y, z.y]) for (const w of [a.z, z.z]) out.push(new THREE.Vector3(x, y, w)); return out; }
+function screenRect(box) {
+  camera.updateMatrixWorld(); let l = 1e9, t = 1e9, r = -1e9, b = -1e9;
+  for (const v of corners(box)) { v.project(camera); const x = (v.x + 1) / 2 * W, y = (1 - v.y) / 2 * H; l = Math.min(l, x); r = Math.max(r, x); t = Math.min(t, y); b = Math.max(b, y); }
+  return { l, t, r, b };
+}
+function fit(dir) {
+  if (!houseBox) return;
+  const cr = clearRect(), cx = (cr.l + cr.r) / 2, cy = (cr.t + cr.b) / 2, m = Math.max(10, 0.05 * Math.min(cr.r - cr.l, cr.b - cr.t));
+  camera.setViewOffset(W, H, W / 2 - cx, H / 2 - cy, W, H); camera.updateProjectionMatrix();
+  const c = houseBox.getCenter(new THREE.Vector3()), d = (dir || camera.position.clone().sub(controls.target)).clone().normalize();
+  controls.target.copy(c);
+  const ok = dist => { camera.position.copy(c).addScaledVector(d, dist); camera.lookAt(c); const s = screenRect(houseBox); return s.l >= cr.l + m && s.r <= cr.r - m && s.t >= cr.t + m && s.b <= cr.b - m; };
+  let ox = W / 2 - cx, oy = H / 2 - cy, hi = 400;
+  for (let pass = 0; pass < 4; pass++) {           // fit the distance, then re-centre the model's on-screen box in the clear area
+    let lo = 2; hi = 400; for (let i = 0; i < 36; i++) { const mid = (lo + hi) / 2; if (ok(mid)) hi = mid; else lo = mid; }
+    ok(hi); const s = screenRect(houseBox); ox += (s.l + s.r) / 2 - cx; oy += (s.t + s.b) / 2 - cy;
+    camera.setViewOffset(W, H, ox, oy, W, H); camera.updateProjectionMatrix();
+  }
+  let lo = 2; hi = 400; for (let i = 0; i < 36; i++) { const mid = (lo + hi) / 2; if (ok(mid)) hi = mid; else lo = mid; }
+  ok(hi); controls.minDistance = Math.min(3, hi * 0.3); controls.maxDistance = Math.max(70, hi * 2.5); controls.update();
+}
+function resize() { W = innerWidth; H = innerHeight; renderer.setSize(W, H, false); camera.aspect = W / H; camera.updateProjectionMatrix(); fit(); }
+addEventListener('resize', () => requestAnimationFrame(resize));
+addEventListener('orientationchange', () => setTimeout(resize, 250));
+W = innerWidth; H = innerHeight; renderer.setSize(W, H, false); camera.aspect = W / H; camera.updateProjectionMatrix();
+camera.position.copy(P(10, 4, 6)).add(DIRS.front); controls.target.copy(P(10, 4, 6));
+function view(v) { viewDir = v; fit(DIRS[v]); }
+// test hook: model screen rect vs every visible control
+window.__layout = () => {
+  if (!houseBox) return null; const s = screenRect(houseBox), hits = [];
+  for (const el of overlays()) { const o = rectOf(el); if (o.l < s.r && o.r > s.l && o.t < s.b && o.b > s.t) hits.push(el.id || el.className); }
+  return { vw: W, vh: H, model: Object.fromEntries(Object.entries(s).map(([k, v]) => [k, Math.round(v)])), clear: Object.fromEntries(Object.entries(clearRect()).map(([k, v]) => [k, Math.round(v)])),
+           inView: s.l >= 0 && s.t >= 0 && s.r <= W && s.b <= H, covered: hits, details: $('details').classList.contains('open') };
+};
+// ---------- menus, drawer / sheet ----------
+const menus = { plans: $('pick'), tools: $('tbtn') };
+function closeMenus(except) { for (const [id, btn] of Object.entries(menus)) if (id !== except) { $(id).classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); } }
+function toggleMenu(id) { const open = !$(id).classList.contains('open'); closeMenus(id); $(id).classList.toggle('open', open); menus[id].setAttribute('aria-expanded', open); if (open) closeDetails(); }
+function openDetails() { closeMenus(); const d = $('details'); d.classList.add('open'); d.inert = false; $('dbtn').setAttribute('aria-expanded', 'true'); fit(); }
+function closeDetails() { const d = $('details'); if (!d.classList.contains('open')) return; d.classList.remove('open'); d.inert = true; $('dbtn').setAttribute('aria-expanded', 'false'); fit(); }
+window.__openDetails = openDetails; window.__closeDetails = closeDetails;
+$('pick').onclick = e => { e.stopPropagation(); toggleMenu('plans'); };
+$('tbtn').onclick = e => { e.stopPropagation(); toggleMenu('tools'); };
+$('dbtn').onclick = e => { e.stopPropagation(); $('details').classList.contains('open') ? closeDetails() : openDetails(); };
+$('dclose').onclick = closeDetails;
+$('fit').onclick = () => fit();
+$('prev').onclick = () => load((curIdx + data.plans.length - 1) % data.plans.length);
+$('next').onclick = () => load((curIdx + 1) % data.plans.length);
+addEventListener('keydown', e => { if (e.key === 'Escape') { closeMenus(); closeDetails(); } });
+document.addEventListener('pointerdown', e => { if (!e.target.closest('.menu, #pick, #tbtn')) closeMenus(); });
+// a tap (not a drag) on the model closes the drawer / sheet; orbiting still works while it is open
+let down = null;
+canvas.addEventListener('pointerdown', e => { down = { x: e.clientX, y: e.clientY, t: performance.now() }; });
+canvas.addEventListener('pointerup', e => { if (down && Math.hypot(e.clientX - down.x, e.clientY - down.y) < 6 && performance.now() - down.t < 350) closeDetails(); down = null; });
+// swipe the sheet down to close (phone)
+let sy = null; const dh = $('details');
+dh.addEventListener('transitionend', e => { if (e.target === dh && e.propertyName === 'transform') fit(); });
+dh.addEventListener('touchstart', e => { if (!e.target.closest('.body') || $('info').scrollTop <= 0) sy = e.touches[0].clientY; }, { passive: true });
+dh.addEventListener('touchmove', e => { if (sy != null && e.touches[0].clientY - sy > 70) { sy = null; closeDetails(); } }, { passive: true });
+function updateBadge() {
+  const n = (cutMode !== 'full') + skyOn + tubeOn, b = $('badge'); b.textContent = n; b.classList.toggle('show', n > 0);
 }
 function info(p) {
-  document.getElementById('info').innerHTML = `<h2>${p.name}</h2><table>
+  $('dtitle').textContent = p.name;
+  $('info').innerHTML = `<table>
+  <tr class="cost"><td>Cost</td><td>${p.cost}</td></tr>
   <tr><td>Size</td><td>${p.size}</td></tr><tr><td>Area</td><td>${p.area}</td></tr><tr><td>Bedrooms</td><td>${p.beds}</td></tr><tr><td>Baths</td><td>${p.baths}</td></tr>
-  <tr><td>Cost</td><td>${p.cost}</td></tr><tr><td>Master bed</td><td>California king · ${p.king}</td></tr>
+  <tr><td>Master bed</td><td>California king · ${p.king}</td></tr>
   <tr><td>Skylight</td><td>optional, ${p.sky}</td></tr><tr><td>Light tube</td><td>optional, ${p.tube}</td></tr><tr><td>3D</td><td>${p.note}</td></tr></table>
   <p>${data.built} Siding in every total: ${data.siding}.</p><p>${data.basis}</p>`;
 }
 function load(i) {
-  const p = data.plans[i]; cur = p; info(p); status.style.display = 'block'; status.textContent = 'loading ' + p.name + '…';
-  document.querySelectorAll('.plan').forEach((b, j) => { b.classList.toggle('on', j === i); b.disabled = true; });
+  const p = data.plans[i]; cur = p; curIdx = i; info(p); closeMenus(); window.__ready = '';
+  $('pickname').innerHTML = `<span class="n">${i + 1}.</span> ${p.name}`; $('pick').title = 'Choose a plan (' + p.name + ')';
+  status.style.display = 'block'; status.textContent = 'loading ' + p.name + '…';
+  document.querySelectorAll('.pl').forEach((b, j) => { b.classList.toggle('on', j === i); b.setAttribute('aria-current', j === i); });
   if (cutMode === 'f2' && p.f2 == null) cutMode = 'full';
+  const want = i;
   loader.load(p.model, g => {
+    if (want !== curIdx) return;                       // a newer plan was picked meanwhile
     if (model) { scene.remove(model); model.traverse(o => { o.geometry?.dispose?.(); }); }
     model = g.scene; scene.add(model);
     model.traverse(o => { if (o.isMesh) { const ms = Array.isArray(o.material) ? o.material : [o.material]; ms.forEach(m => { if (!NOCLIP.test(m.name || '')) m.clippingPlanes = [cut]; m.clipShadows = true; }); } });
-    model.updateMatrixWorld(true); applyCut(); rebuildExtras(); status.style.display = 'none';
-    document.querySelectorAll('.plan').forEach(b => b.disabled = false); window.__ready = p.id;
+    model.updateMatrixWorld(true); houseBox = computeHouseBox(); applyCut(); rebuildExtras(); status.style.display = 'none';
+    fit(DIRS[viewDir]); window.__ready = p.id;
   }, e => { if (e.total) status.textContent = `loading ${p.name}… ${Math.round(100 * e.loaded / e.total)}%`; },
-     err => { status.textContent = 'could not load ' + p.model; console.error(err); document.querySelectorAll('.plan').forEach(b => b.disabled = false); });
+     err => { status.textContent = 'could not load ' + p.model; console.error(err); });
 }
 fetch('plans.json').then(r => r.json()).then(d => {
-  data = d; const side = document.getElementById('side');
-  d.plans.forEach((p, i) => { const b = document.createElement('button'); b.className = 'plan';
-    b.innerHTML = `<img src="${p.thumb}" alt=""><span>${i + 1}. ${p.name}<small>${p.size.replace(' · ', ', ')}</small></span>`; b.onclick = () => load(i); side.appendChild(b); });
+  data = d; const menu = $('plans');
+  d.plans.forEach((p, i) => { const b = document.createElement('button'); b.className = 'pl'; b.setAttribute('role', 'menuitem');
+    b.innerHTML = `<img src="${p.thumb}" alt="" loading="lazy"><span>${i + 1}. ${p.name}<small>${p.size.replace(' · ', ', ')}</small></span>`; b.onclick = () => load(i); menu.appendChild(b); });
   const q = new URLSearchParams(location.search); const start = Math.max(0, d.plans.findIndex(p => p.id === q.get('plan')));
   if (q.get('sky')) skyOn = true; if (q.get('tube')) tubeOn = true; if (q.get('cut')) cutMode = q.get('cut');
-  view(q.get('view') || 'front'); load(start);
+  if (DIRS[q.get('view')]) viewDir = q.get('view');
+  load(start);
+  if (q.get('details')) openDetails();
 });
 document.querySelectorAll('[data-view]').forEach(b => b.onclick = () => view(b.dataset.view));
 document.querySelectorAll('[data-cut]').forEach(b => b.onclick = () => { cutMode = b.dataset.cut; applyCut(); });
-document.getElementById('sky').onclick = () => { skyOn = !skyOn; rebuildExtras(); };
-document.getElementById('tube').onclick = () => { tubeOn = !tubeOn; rebuildExtras(); };
+$('sky').onclick = () => { skyOn = !skyOn; rebuildExtras(); };
+$('tube').onclick = () => { tubeOn = !tubeOn; rebuildExtras(); };
 renderer.setAnimationLoop(() => { controls.update(); renderer.render(scene, camera); });
 </script>
 </body>
