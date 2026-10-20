@@ -35,6 +35,13 @@
   .pl span { font-size: 13px; font-weight: 600; line-height: 1.2; } .pl small { display: block; font-weight: 400; opacity: .8; font-size: 11.5px; }
   /* view / floors / options menu, bottom-right corner */
   .corner { position: fixed; z-index: 10; right: calc(var(--pad) + var(--sr)); bottom: calc(var(--pad) + var(--sb)); display: flex; gap: 6px; }
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 18px; overflow: hidden; background: var(--ui); height: 36px; }
+  .seg button { border: 0; background: transparent; color: #fff; padding: 0 11px; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .seg button.on { background: var(--blue); color: #111; }
+  .btn.on { background: var(--blue); color: #111; border-color: var(--blue); }
+  .hide { display: none !important; }
+  #labels { position: fixed; inset: 0; pointer-events: none; z-index: 4; }
+  #labels span { position: absolute; transform: translate(-50%, -50%); background: #0b0e12c4; color: #fff; padding: 2px 7px; border-radius: 9px; font-size: 11.5px; font-weight: 600; white-space: nowrap; }
   #tools { right: calc(var(--pad) + var(--sr)); bottom: calc(var(--pad) + var(--sb) + 44px); width: 236px; }
   .grp { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-bottom: 8px; } .grp.two { grid-template-columns: 1fr 1fr; }
   .grp button { min-height: 34px; padding: 4px 6px; border-radius: 8px; border: 1px solid var(--line); background: #ffffff0d; color: #fff; font-size: 12px; font-weight: 600; cursor: pointer; line-height: 1.15; }
@@ -59,7 +66,7 @@
     .grab { display: block; width: 40px; height: 5px; border-radius: 3px; background: #fff5; margin: 8px auto 0; }
     #details header { padding-top: 6px; }
     #pick { max-width: none; } .dlabel { display: none; } #dbtn { width: 36px; padding: 0; }
-    .tlabel { display: none; }
+    .tlabel { display: none; } .seg button { padding: 0 9px; } .slabel { display: none; }
   }
   #status { position: fixed; z-index: 9; left: calc(var(--pad) + var(--sl)); bottom: calc(var(--pad) + var(--sb) + 4px); background: var(--ui); padding: 6px 11px; border-radius: 12px; font-size: 12px; pointer-events: none; max-width: 60vw; }
 </style>
@@ -74,13 +81,16 @@
   <button class="btn" id="dbtn" aria-haspopup="dialog" aria-expanded="false" aria-controls="details" title="Plan details and budget"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="9.5"/><path d="M12 11v6" stroke-linecap="round"/><circle cx="12" cy="7.5" r="1.3" fill="currentColor" stroke="none"/></svg><span class="dlabel">Details</span></button>
 </div>
 <div class="menu" id="plans" role="menu" aria-label="Plans"><h3>Cabin addition · 7 plans</h3></div>
+<div id="labels" role="presentation"></div>
 <div class="corner">
+  <button class="btn" id="inside" aria-pressed="false" title="Roof off: see the furnished inside"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M9 20v-5h6v5"/></svg><span>Inside</span></button>
+  <span class="seg hide" id="floorseg" role="group" aria-label="Floor"><button data-floor="1" class="on"><span class="slabel">Floor </span>1</button><button data-floor="2"><span class="slabel">Floor </span>2</button></span>
+  <button class="btn ico hide" id="lbl" aria-pressed="false" aria-label="Room labels" title="Room labels"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linejoin="round"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.4" fill="currentColor" stroke="none"/></svg></button>
   <button class="btn ico" id="fit" aria-label="Fit model to screen" title="Fit model to screen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
-  <button class="btn" id="tbtn" aria-haspopup="true" aria-expanded="false" aria-controls="tools" title="View, floors and options"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linejoin="round"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/></svg><span class="tlabel">View</span><span class="badge" id="badge"></span></button>
+  <button class="btn" id="tbtn" aria-haspopup="true" aria-expanded="false" aria-controls="tools" title="Camera and options"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linejoin="round"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/></svg><span class="tlabel">View</span><span class="badge" id="badge"></span></button>
 </div>
-<div class="menu" id="tools" role="menu" aria-label="View, floors and options">
+<div class="menu" id="tools" role="menu" aria-label="Camera and options">
   <h3>Camera</h3><div class="grp"><button data-view="front">Front</button><button data-view="rear">Rear</button><button data-view="top">Top</button></div>
-  <h3>Floors</h3><div class="grp"><button data-cut="full" class="on">Whole house</button><button data-cut="f2" id="cutf2">Upper floor cut-away</button><button data-cut="f1">Main floor cut-away</button></div>
   <h3>Options</h3><div class="grp two" style="margin-bottom:2px"><button id="sky">Skylight (option)</button><button id="tube">Light tube (option)</button></div>
 </div>
 <aside id="details" role="dialog" aria-modal="false" aria-labelledby="dtitle" inert>
@@ -109,15 +119,20 @@ new RGBELoader().load('kloofendal_48d_partly_cloudy_puresky_1k.hdr', t => { t.ma
 const draco = new DRACOLoader().setDecoderPath('./vendor/three/examples/jsm/libs/draco/gltf/');
 const loader = new GLTFLoader().setDRACOLoader(draco);
 const cut = new THREE.Plane(new THREE.Vector3(0, -1, 0), 1e4);
+const PLACEHOLDER = /^PB_(basin|bed_frame|duvet|headboard|mattress|nightstand|pillow|rug|shower_pan|shower_wall|vanity|vanity_top|wc_bowl|wc_tank|appliance)/;
 const NOCLIP = /Bark|Needles|Leaves|BirchBark|Ground|GrassTuft|Water/;
-let data, cur = null, model = null, extras = new THREE.Group(), skyOn = false, tubeOn = false, cutMode = 'full', curIdx = 0, viewDir = 'front';
+let data, cur = null, model = null, extras = new THREE.Group(), skyOn = false, tubeOn = false, cutMode = 'full', curIdx = 0, viewDir = 'front', inside = false, floor = 1, labelsOn = false, furnGroup = new THREE.Group();
 scene.add(extras);
 function applyCut() {
   const p = cur; let h = 1e4;
+  cutMode = inside ? (floor === 2 && p.f2 != null ? 'f2' : 'f1') : 'full';
+  if (model) model.traverse(o => { if (ROOF.test(o.name || '')) o.visible = !inside; });   // roof off
   if (cutMode === 'f2' && p.f2 != null) h = (p.f2 + 4.5) * FT; else if (cutMode === 'f1') h = (p.f1 + 4.5) * FT;
   cut.constant = h;
-  document.querySelectorAll('[data-cut]').forEach(b => { b.classList.toggle('on', b.dataset.cut === cutMode); b.setAttribute('aria-pressed', b.dataset.cut === cutMode); });
-  document.getElementById('cutf2').disabled = p.f2 == null; updateBadge();
+  const two = p.f2 != null; $('floorseg').classList.toggle('hide', !(inside && two)); $('lbl').classList.toggle('hide', !inside);
+  $('inside').classList.toggle('on', inside); $('inside').setAttribute('aria-pressed', inside);
+  document.querySelectorAll('[data-floor]').forEach(b => b.classList.toggle('on', +b.dataset.floor === floor));
+  $('lbl').classList.toggle('on', labelsOn); $('lbl').setAttribute('aria-pressed', labelsOn); buildLabels(); updateBadge();
 }
 // optional skylight / light tube: placed by casting a ray down onto the addition roof at the hall / landing spot
 function roofHit(x, y) {
@@ -179,17 +194,26 @@ function screenRect(box) {
   for (const v of corners(box)) { v.project(camera); const x = (v.x + 1) / 2 * W, y = (1 - v.y) / 2 * H; l = Math.min(l, x); r = Math.max(r, x); t = Math.min(t, y); b = Math.max(b, y); }
   return { l, t, r, b };
 }
+const IN_DIR_WIDE = P(0.42, -0.72, 1.15), IN_DIR_TALL = P(1.0, -0.3, 1.25);   // portrait: look from the east so the long addition runs up the screen
+const inDir = () => (W / H < 0.8 ? IN_DIR_TALL : IN_DIR_WIDE);
+const ROOF = /^(EX_Roof|WING_Roof|ENTRY_Porch|ADD_Roof|V4_ROOFS)/;
+function fitBox() {
+  if (!inside || !houseBox) return houseBox;
+  const b = houseBox.clone(), lv = (floor === 2 && cur.f2 != null ? cur.f2 : cur.f1);
+  b.min.y = Math.max(b.min.y, (lv - 0.3) * FT); b.max.y = Math.min(b.max.y, (lv + 4.5) * FT); b.max.z = Math.min(b.max.z, 2 * FT);   // plan y >= -2 ft: the addition
+  return b;
+}
 function fit(dir) {
-  if (!houseBox) return;
+  if (!houseBox) return; const FB = fitBox();
   const cr = clearRect(), cx = (cr.l + cr.r) / 2, cy = (cr.t + cr.b) / 2, m = Math.max(10, 0.05 * Math.min(cr.r - cr.l, cr.b - cr.t));
   camera.setViewOffset(W, H, W / 2 - cx, H / 2 - cy, W, H); camera.updateProjectionMatrix();
-  const c = houseBox.getCenter(new THREE.Vector3()), d = (dir || camera.position.clone().sub(controls.target)).clone().normalize();
+  const c = FB.getCenter(new THREE.Vector3()), d = (dir || camera.position.clone().sub(controls.target)).clone().normalize();
   controls.target.copy(c);
-  const ok = dist => { camera.position.copy(c).addScaledVector(d, dist); camera.lookAt(c); const s = screenRect(houseBox); return s.l >= cr.l + m && s.r <= cr.r - m && s.t >= cr.t + m && s.b <= cr.b - m; };
+  const ok = dist => { camera.position.copy(c).addScaledVector(d, dist); camera.lookAt(c); const s = screenRect(FB); return s.l >= cr.l + m && s.r <= cr.r - m && s.t >= cr.t + m && s.b <= cr.b - m; };
   let ox = W / 2 - cx, oy = H / 2 - cy, hi = 400;
   for (let pass = 0; pass < 4; pass++) {           // fit the distance, then re-centre the model's on-screen box in the clear area
     let lo = 2; hi = 400; for (let i = 0; i < 36; i++) { const mid = (lo + hi) / 2; if (ok(mid)) hi = mid; else lo = mid; }
-    ok(hi); const s = screenRect(houseBox); ox += (s.l + s.r) / 2 - cx; oy += (s.t + s.b) / 2 - cy;
+    ok(hi); const s = screenRect(FB); ox += (s.l + s.r) / 2 - cx; oy += (s.t + s.b) / 2 - cy;
     camera.setViewOffset(W, H, ox, oy, W, H); camera.updateProjectionMatrix();
   }
   let lo = 2; hi = 400; for (let i = 0; i < 36; i++) { const mid = (lo + hi) / 2; if (ok(mid)) hi = mid; else lo = mid; }
@@ -203,10 +227,10 @@ camera.position.copy(P(10, 4, 6)).add(DIRS.front); controls.target.copy(P(10, 4,
 function view(v) { viewDir = v; fit(DIRS[v]); }
 // test hook: model screen rect vs every visible control
 window.__layout = () => {
-  if (!houseBox) return null; const s = screenRect(houseBox), hits = [];
+  if (!houseBox) return null; const s = screenRect(fitBox()), hits = [];
   for (const el of overlays()) { const o = rectOf(el); if (o.l < s.r && o.r > s.l && o.t < s.b && o.b > s.t) hits.push(el.id || el.className); }
   return { vw: W, vh: H, model: Object.fromEntries(Object.entries(s).map(([k, v]) => [k, Math.round(v)])), clear: Object.fromEntries(Object.entries(clearRect()).map(([k, v]) => [k, Math.round(v)])),
-           inView: s.l >= 0 && s.t >= 0 && s.r <= W && s.b <= H, covered: hits, details: $('details').classList.contains('open') };
+           inView: s.l >= 0 && s.t >= 0 && s.r <= W && s.b <= H, covered: hits, inside, floor, labels: labelsOn ? [...document.querySelectorAll('#labels span')].filter(e => e.style.display !== 'none').length : 0, details: $('details').classList.contains('open') };
 };
 // ---------- menus, drawer / sheet ----------
 const menus = { plans: $('pick'), tools: $('tbtn') };
@@ -233,8 +257,24 @@ let sy = null; const dh = $('details');
 dh.addEventListener('transitionend', e => { if (e.target === dh && e.propertyName === 'transform') fit(); });
 dh.addEventListener('touchstart', e => { if (!e.target.closest('.body') || $('info').scrollTop <= 0) sy = e.touches[0].clientY; }, { passive: true });
 dh.addEventListener('touchmove', e => { if (sy != null && e.touches[0].clientY - sy > 70) { sy = null; closeDetails(); } }, { passive: true });
+const LB = $('labels');
+function buildLabels() {
+  LB.innerHTML = ''; if (!inside || !labelsOn || !cur) return;
+  for (const r of cur.rooms || []) { if (r.f !== (cur.f2 != null ? floor : 1)) continue; const e = document.createElement('span'); e.textContent = r.t; e._p = P(r.x, r.y, r.z); LB.appendChild(e); }
+}
+const _v = new THREE.Vector3();
+function placeLabels() {
+  for (const e of LB.children) { _v.copy(e._p).project(camera); const on = _v.z < 1 && Math.abs(_v.x) < 1.05 && Math.abs(_v.y) < 1.05;
+    e.style.display = on ? '' : 'none'; if (on) { e.style.left = ((_v.x + 1) / 2 * W) + 'px'; e.style.top = ((1 - _v.y) / 2 * H) + 'px'; } }
+}
+function setInside(v, f) {
+  inside = v; if (f) floor = f; if (cur && cur.f2 == null) floor = 1; applyCut(); fit(inside ? inDir() : DIRS[viewDir]);
+}
+$('inside').onclick = () => setInside(!inside);
+document.querySelectorAll('[data-floor]').forEach(b => b.onclick = () => setInside(true, +b.dataset.floor));
+$('lbl').onclick = () => { labelsOn = !labelsOn; applyCut(); };
 function updateBadge() {
-  const n = (cutMode !== 'full') + skyOn + tubeOn, b = $('badge'); b.textContent = n; b.classList.toggle('show', n > 0);
+  const n = skyOn + tubeOn, b = $('badge'); b.textContent = n; b.classList.toggle('show', n > 0);
 }
 function info(p) {
   $('dtitle').textContent = p.name;
@@ -250,7 +290,7 @@ function load(i) {
   $('pickname').innerHTML = `<span class="n">${i + 1}.</span> ${p.name}`; $('pick').title = 'Choose a plan (' + p.name + ')';
   status.style.display = 'block'; status.textContent = 'loading ' + p.name + '…';
   document.querySelectorAll('.pl').forEach((b, j) => { b.classList.toggle('on', j === i); b.setAttribute('aria-current', j === i); });
-  if (cutMode === 'f2' && p.f2 == null) cutMode = 'full';
+  if (p.f2 == null) floor = 1;
   const want = i;
   loader.load(p.model, g => {
     if (want !== curIdx) return;                       // a newer plan was picked meanwhile
@@ -258,7 +298,15 @@ function load(i) {
     model = g.scene; scene.add(model);
     model.traverse(o => { if (o.isMesh) { const ms = Array.isArray(o.material) ? o.material : [o.material]; ms.forEach(m => { if (!NOCLIP.test(m.name || '')) m.clippingPlanes = [cut]; m.clipShadows = true; }); } });
     model.updateMatrixWorld(true); houseBox = computeHouseBox(); applyCut(); rebuildExtras(); status.style.display = 'none';
-    fit(DIRS[viewDir]); window.__ready = p.id;
+    fit(inside ? inDir() : DIRS[viewDir]);
+    const extra = [p.furn, p.main].filter(Boolean);
+    Promise.all(extra.map(u => loader.loadAsync(u).catch(e => { console.error(e); return null; }))).then(gs => {
+      if (want !== curIdx) return;
+      scene.remove(furnGroup); furnGroup.traverse(o => o.geometry?.dispose?.()); furnGroup = new THREE.Group(); scene.add(furnGroup);
+      for (const g of gs) if (g) { g.scene.traverse(o => { if (o.isMesh) { const ms = Array.isArray(o.material) ? o.material : [o.material]; ms.forEach(m => { m.clippingPlanes = [cut]; }); } }); furnGroup.add(g.scene); }
+      if (p.furn) model.traverse(o => { if (PLACEHOLDER.test(o.name || '')) o.visible = false; });
+      window.__ready = p.id;
+    });
   }, e => { if (e.total) status.textContent = `loading ${p.name}… ${Math.round(100 * e.loaded / e.total)}%`; },
      err => { status.textContent = 'could not load ' + p.model; console.error(err); });
 }
@@ -267,16 +315,15 @@ fetch('plans.json').then(r => r.json()).then(d => {
   d.plans.forEach((p, i) => { const b = document.createElement('button'); b.className = 'pl'; b.setAttribute('role', 'menuitem');
     b.innerHTML = `<img src="${p.thumb}" alt="" loading="lazy"><span>${i + 1}. ${p.name}<small>${p.size.replace(' · ', ', ')}</small></span>`; b.onclick = () => load(i); menu.appendChild(b); });
   const q = new URLSearchParams(location.search); const start = Math.max(0, d.plans.findIndex(p => p.id === q.get('plan')));
-  if (q.get('sky')) skyOn = true; if (q.get('tube')) tubeOn = true; if (q.get('cut')) cutMode = q.get('cut');
+  if (q.get('sky')) skyOn = true; if (q.get('tube')) tubeOn = true; if (q.get('cut') && q.get('cut') !== 'full') { inside = true; floor = q.get('cut') === 'f2' ? 2 : 1; } if (q.get('inside')) inside = true; if (q.get('floor')) floor = +q.get('floor') === 2 ? 2 : 1; if (q.get('labels')) labelsOn = true;
   if (DIRS[q.get('view')]) viewDir = q.get('view');
   load(start);
   if (q.get('details')) openDetails();
 });
 document.querySelectorAll('[data-view]').forEach(b => b.onclick = () => view(b.dataset.view));
-document.querySelectorAll('[data-cut]').forEach(b => b.onclick = () => { cutMode = b.dataset.cut; applyCut(); });
 $('sky').onclick = () => { skyOn = !skyOn; rebuildExtras(); };
 $('tube').onclick = () => { tubeOn = !tubeOn; rebuildExtras(); };
-renderer.setAnimationLoop(() => { controls.update(); renderer.render(scene, camera); });
+renderer.setAnimationLoop(() => { controls.update(); renderer.render(scene, camera); if (LB.children.length) placeLabels(); });
 </script>
 </body>
 </html>
